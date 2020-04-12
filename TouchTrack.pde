@@ -10,7 +10,7 @@ TouchTracker touchTracker = new TouchTracker(5);
 
 void setup() {
   size(900, 700);
-
+  surface.setLocation(-920,300);
   String portName = Serial.list()[3];
   myPort = new Serial(this, portName, 115200);
 
@@ -25,7 +25,6 @@ void draw()
 {
   background(153);
   readSerial();
-
   for (int i = 0; i < touchTracker.touchCount(); i++) {
     touchTracker.GetTouch(i).draw();
   }
@@ -52,15 +51,11 @@ void readSerial() {
 
 
 void ParseTouchPoints(String data) {
-  println(data);
-
   String[] newTouchPoints = split(data, '|');
-
   for (int i =0; i < newTouchPoints.length; i++) {
     String[] touchData = split(newTouchPoints[i], ':');
-
     if (touchData.length == 5) {
-      PVector pos =  new PVector( Integer.parseInt(touchData[2]), Integer.parseInt(touchData[3]));
+      PVector pos =  new PVector(Integer.parseInt(touchData[2]), Integer.parseInt(touchData[3]));
       touchTracker.UpdateTouchPosition(pos, Integer.parseInt(touchData[4]));
     }
   }
@@ -75,7 +70,7 @@ public void setResolution(int w, int h) {
   myPort.write(t);
 
 
-  t= "g:10\n";
+  t= "g:3\n";
   println("Sending gain: " + t);
   myPort.write(t);
 }

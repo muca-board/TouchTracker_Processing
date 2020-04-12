@@ -3,7 +3,6 @@
 class TouchTracker {
 
 
-
   ////////////////////////////
   //    Settings
   //////////////////////////
@@ -14,14 +13,16 @@ class TouchTracker {
   ArrayList<TouchPoint> touchPoints = new ArrayList<TouchPoint>();
 
 
-
   boolean isUpdating = false;
   int startUpdateTime = 0;
   int endUpdateTime = 0;
 
-  // Find Settings
-  public  int closeThreshold = 20;
 
+
+  int  delayBeforeResetingTouchPoint = 150;
+
+  // Find Settings
+  public  int closeThreshold = 100;
 
 
 
@@ -38,7 +39,7 @@ class TouchTracker {
 
   public TouchTracker(int maxNumberOftouchPoints ) {
     for (int i =0; i < maxNumberOftouchPoints; i++) {
-      touchPoints.add(new TouchPoint());
+      touchPoints.add(new TouchPoint(i));
     }
   }
 
@@ -122,8 +123,11 @@ class TouchTracker {
     }
 
     //todo:remove
-    if (closestTouchPoint == null)
-      println("ERROOOOOOOOOR");
+    if (closestTouchPoint == null) {
+            println("ERROOOOOOOOOR");
+    }
+    else
+      closestTouchPoint.Update(position, weight);
 
 
     // assign new fingerID
@@ -135,10 +139,9 @@ class TouchTracker {
 
 
   void AssignFingerID(TouchPoint touchPoint) {
-      // TODO : cette fonction ne sert a rien.
-    
-    
-    touchPoint.NewId();
+    // TODO : cette fonction ne sert a rien.
+
+    //touchPoint.NewId();
   }
 
   // override
@@ -154,8 +157,8 @@ class TouchTracker {
     //isUpdating = true;
 
     EndTouchFlaggedUp();
+    EndTouchNotActiveSinceLongTime();
   }
-
 
   public void EndTouchFlaggedUp() {
     for (int i = 0; i<touchPoints.size(); i++) {
@@ -163,8 +166,30 @@ class TouchTracker {
     }
   }
 
+  public void EndTouchNotActiveSinceLongTime() {
+    for (int i = 0; i<touchPoints.size(); i++) {
+      TouchPoint tp = touchPoints.get(i);
+      if (!tp.hasBeenUpdated && tp.deltaTimeUpdate > delayBeforeResetingTouchPoint) {
+          tp.Reset();
+      }
+    }
+
+  }
+
   public void EndUpdate() {
-  //TODO :   println("Ici on doit cleaner et enlever les blobs qui n'ont pas été update cette frame");
+    //TODO :   println("Ici on doit cleaner et enlever les blobs qui n'ont pas été update cette frame");
+    for (TouchPoint tp : touchPoints) {
+      if (tp.isActive()) {
+      }
+    }
+
+    for (TouchPoint tp : touchPoints) {
+      tp.ResetUpdateState(); // Flag up is not updated
+
+     // println("removeAfterDelay");
+      // TODO : change this function to check if  removeAfterDelay is enabled and remove after a certain delay and not right away
+    }
+
 
     if (isUpdating) {
       endUpdateTime = millis();
@@ -189,6 +214,6 @@ class TouchTracker {
 
   public TouchPoint GetTouch(int index) {
     // retoruner  filtrer en fonction de l'id
-    return touchPoints.get(0);
+    return touchPoints.get(index);
   }
 }

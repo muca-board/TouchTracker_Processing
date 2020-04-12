@@ -7,9 +7,9 @@ enum TouchState {
 
 class TouchPoint {
 
-  
-    int fingerId = -1;
-    
+
+  int fingerId = -1;
+
   TouchState state = TouchState.ENDED;
   PVector position = new PVector(0, 0);
   //PVector filteredPosition = new PVector(0,0);
@@ -20,15 +20,16 @@ class TouchPoint {
   int lastUpdate = 0;
   int deltaTimeUpdate = 0;
 
-  public TouchPoint() {
-    
-    // assign a new finger ID 
-    
+  boolean hasBeenUpdated = false;
+
+  public TouchPoint(int index) {
+    fingerId = index;
+    // assign a new finger ID
   }
-  
-  
+
+
   public void NewId() {
-   // todo : here assign new finger ID 
+    // todo : here assign new finger ID
   }
 
 
@@ -38,8 +39,11 @@ class TouchPoint {
 
 
   public void Update(PVector newPosition, int newWeight) {
+
     // calculate time
     int thisUpdate = millis();
+    if (state == TouchState.ENDED) lastUpdate = thisUpdate; // We reset the last updated flag
+
     deltaTimeUpdate = thisUpdate - lastUpdate;
     lastUpdate = millis(); // OR Date d = new Date(); long current = d.getTime()/1000; 
 
@@ -64,14 +68,28 @@ class TouchPoint {
       state = TouchState.DOWN;
       break;
     }
+
+
+    hasBeenUpdated = true;
   }
 
+
+  public void ResetUpdateState() {
+    if (isActive() && !hasBeenUpdated)
+      state = TouchState.UP;
+
+    hasBeenUpdated =false;
+  }
 
   public void DisableIfUpState() {
-   if(state == TouchState.UP) {
-     state = TouchState.ENDED;
-   }
+    if (state == TouchState.UP) {
+      state = TouchState.ENDED;
+
+    }
   }
+
+
+
 
   public void draw() {
     // here update position
@@ -80,15 +98,15 @@ class TouchPoint {
     if (state == TouchState.DOWN)   stroke(0, 255, 0);
     if (state == TouchState.CONTACT)   stroke(0, 0, 0);
     if (state == TouchState.UP) {
-      println("DRAW UP"); //TODO : vérifier que ça dessine bien le up state
       stroke(255, 0, 0);
     }
 
-    if (state != TouchState.ENDED) {
+    //if (state != TouchState.ENDED) {
+    if (true) {
       text(fingerId, position.x, position.y);
       // fill(col);
       noFill();
-      ellipse(position.x, position.y, weight*3, weight*3);
+      ellipse(position.x, position.y, weight, weight);
 
       line(position.x, position.y, position.x-10, position.y);
       line(position.x, position.y, position.x+10, position.y);
@@ -98,9 +116,16 @@ class TouchPoint {
 
     /*
     // Remove at the end
-    if (state == TouchState.UP) {
-      state = TouchState.ENDED;
-    }
-    */
+     if (state == TouchState.UP) {
+     state = TouchState.ENDED;
+     }
+     */
+  }
+
+  public void Reset() {
+    println("reset");
+    state = TouchState.ENDED;
+    position = new PVector(-100, -100);
+    deltaTimeUpdate  =  0;
   }
 }
