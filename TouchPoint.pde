@@ -7,7 +7,6 @@ enum TouchState {
 
 class TouchPoint {
 
-
   int fingerId = -1;
 
   TouchState state = TouchState.ENDED;
@@ -28,8 +27,9 @@ class TouchPoint {
   }
 
 
-  public void NewId() {
+  public void NewId(int id) {
     // todo : here assign new finger ID
+    fingerId = id;
   }
 
 
@@ -42,7 +42,7 @@ class TouchPoint {
 
     // calculate time
     int thisUpdate = millis();
-    if (state == TouchState.ENDED) lastUpdate = thisUpdate; // We reset the last updated flag
+    if (state == TouchState.ENDED) lastUpdate = thisUpdate; // We reset the last updated flag  
 
     deltaTimeUpdate = thisUpdate - lastUpdate;
     lastUpdate = millis(); // OR Date d = new Date(); long current = d.getTime()/1000; 
@@ -84,7 +84,6 @@ class TouchPoint {
   public void DisableIfUpState() {
     if (state == TouchState.UP) {
       state = TouchState.ENDED;
-
     }
   }
 
@@ -94,6 +93,7 @@ class TouchPoint {
   public void draw() {
     // here update position
 
+  println("draw");
     strokeWeight(1);
     if (state == TouchState.DOWN)   stroke(0, 255, 0);
     if (state == TouchState.CONTACT)   stroke(0, 0, 0);
@@ -103,9 +103,12 @@ class TouchPoint {
 
     //if (state != TouchState.ENDED) {
     if (true) {
-      text(fingerId, position.x, position.y);
+      fill(255);
+      textSize(18);
+      text(fingerId, position.x+10, position.y+10);
       // fill(col);
       noFill();
+      stroke(50,50,255);
       ellipse(position.x, position.y, weight, weight);
 
       line(position.x, position.y, position.x-10, position.y);

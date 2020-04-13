@@ -12,7 +12,6 @@ class TouchTracker {
 
   ArrayList<TouchPoint> touchPoints = new ArrayList<TouchPoint>();
 
-
   boolean isUpdating = false;
   int startUpdateTime = 0;
   int endUpdateTime = 0;
@@ -70,8 +69,14 @@ class TouchTracker {
     }
 
     if (closestTouchPoint == null) {
+      println("AssignNewTouchPoint");
       return AssignNewTouchPoint(position, weight);
     } else {
+      print("update " );
+      print(closestTouchPoint.fingerId);
+      print("  " );
+      println(closestTouchPoint.state);
+
       closestTouchPoint.Update(position, weight);
       return closestTouchPoint;
     }
@@ -122,14 +127,15 @@ class TouchTracker {
       }
     }
 
+
+
+
+
     //todo:remove
     if (closestTouchPoint == null) {
-            println("ERROOOOOOOOOR");
-    }
-    else
+      println("ERROOOOOOOOOR");
+    } else
       closestTouchPoint.Update(position, weight);
-
-
     // assign new fingerID
     AssignFingerID(closestTouchPoint);
 
@@ -141,7 +147,24 @@ class TouchTracker {
   void AssignFingerID(TouchPoint touchPoint) {
     // TODO : cette fonction ne sert a rien.
 
-    //touchPoint.NewId();
+    int freeFingerId = -1;
+
+    for (int i = 0; i<touchPoints.size(); i++) {
+      TouchPoint tp = touchPoints.get(i);
+      if (!tp.isActive() ) {
+        freeFingerId = tp.fingerId; // reassign id;
+        continue; // we stop all further iterations
+      }
+    }
+
+
+    if (freeFingerId != -1) {
+      touchPoint.NewId(freeFingerId);
+    } else {
+      println("All finger ID are not available... thsi should not happend");
+    }
+    //
+    //
   }
 
   // override
@@ -169,11 +192,10 @@ class TouchTracker {
   public void EndTouchNotActiveSinceLongTime() {
     for (int i = 0; i<touchPoints.size(); i++) {
       TouchPoint tp = touchPoints.get(i);
-      if (!tp.hasBeenUpdated && tp.deltaTimeUpdate > delayBeforeResetingTouchPoint) {
-          tp.Reset();
+      if (!tp.hasBeenUpdated ) {
+        //  tp.Reset();
       }
     }
-
   }
 
   public void EndUpdate() {
@@ -186,7 +208,7 @@ class TouchTracker {
     for (TouchPoint tp : touchPoints) {
       tp.ResetUpdateState(); // Flag up is not updated
 
-     // println("removeAfterDelay");
+      // println("removeAfterDelay");
       // TODO : change this function to check if  removeAfterDelay is enabled and remove after a certain delay and not right away
     }
 
@@ -214,6 +236,19 @@ class TouchTracker {
 
   public TouchPoint GetTouch(int index) {
     // retoruner  filtrer en fonction de l'id
-    return touchPoints.get(index);
+
+    int tmpLoop = 0;
+    TouchPoint touchPoint = null;
+    for (int i = 0; i<touchPoints.size(); i++) {
+      TouchPoint tp = touchPoints.get(i);
+      if (tp.isActive() && touchPoint == null) {
+        if(tmpLoop == index) touchPoint = tp;
+        else  tmpLoop++;
+      }
+    }
+    
+    if(touchPoint == null) println("no touchpoint found");
+      
+    return touchPoint;
   }
 }
