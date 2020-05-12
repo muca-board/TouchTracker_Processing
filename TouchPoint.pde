@@ -7,31 +7,28 @@ enum TouchState {
 
 class TouchPoint {
 
-  int fingerId = -1;
-
   TouchState state = TouchState.ENDED;
   PVector position = new PVector(0, 0);
   //PVector filteredPosition = new PVector(0,0);
 
   int weight = 0;
 
-
   int lastUpdate = 0;
   int deltaTimeUpdate = 0;
 
   boolean hasBeenUpdated = false;
-
+  int touchID = -1;
+  
+  
   public TouchPoint(int index) {
-    fingerId = index;
+    touchID = index;
     // assign a new finger ID
   }
-
-
-  public void NewId(int id) {
-    // todo : here assign new finger ID
-    fingerId = id;
+  
+  public TouchPoint(PVector newPosition, int newWeight) {
+    position = newPosition;
+    weight = newWeight;
   }
-
 
   public boolean isActive() {
     return state == TouchState.CONTACT || state == TouchState.DOWN;
@@ -46,8 +43,6 @@ class TouchPoint {
 
     deltaTimeUpdate = thisUpdate - lastUpdate;
     lastUpdate = millis(); // OR Date d = new Date(); long current = d.getTime()/1000; 
-
-
 
     position = newPosition;
     weight = newWeight;
@@ -75,16 +70,23 @@ class TouchPoint {
 
 
   public void ResetUpdateState() {
-    if (isActive() && !hasBeenUpdated)
-      state = TouchState.UP;
-
-    hasBeenUpdated =false;
+    /* if (isActive() && !hasBeenUpdated)
+     state = TouchState.UP;
+     
+     hasBeenUpdated =false;*/
   }
 
-  public void DisableIfUpState() {
-    if (state == TouchState.UP) {
-      state = TouchState.ENDED;
-    }
+  public boolean CheckIfShouldDisable() {
+    if (!hasBeenUpdated) {
+      if (state == TouchState.UP) {
+        state = TouchState.ENDED;
+        return true;
+      } else {
+        state = TouchState.UP;
+        return false;
+      }
+    } 
+    return false;
   }
 
 
@@ -93,7 +95,6 @@ class TouchPoint {
   public void draw() {
     // here update position
 
-  println("draw");
     strokeWeight(1);
     if (state == TouchState.DOWN)   stroke(0, 255, 0);
     if (state == TouchState.CONTACT)   stroke(0, 0, 0);
@@ -105,10 +106,11 @@ class TouchPoint {
     if (true) {
       fill(255);
       textSize(18);
-      text(fingerId, position.x+10, position.y+10);
+       text(touchID, position.x+10, position.y+10);
       // fill(col);
       noFill();
-      stroke(50,50,255);
+      stroke(50, 50, 255);
+      strokeWeight(3);
       ellipse(position.x, position.y, weight, weight);
 
       line(position.x, position.y, position.x-10, position.y);
@@ -126,7 +128,6 @@ class TouchPoint {
   }
 
   public void Reset() {
-    println("reset");
     state = TouchState.ENDED;
     position = new PVector(-100, -100);
     deltaTimeUpdate  =  0;
